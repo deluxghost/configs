@@ -1,7 +1,7 @@
 unsetopt GLOBAL_RCS
 
-PROMPT="%{^[[1;36m%}%n%{^[[35m%}@%{^[[36m%}%M  %{^[[32m%}%/
-%(?..%{^[[0m%}%? )%{^[[1;31m%}>>%{^[[0m%}"
+PROMPT="%{[1;36m%}%n%{[35m%}@%{[36m%}%M  %{[32m%}%/
+%(?..%{[0m%}%? )%{[1;31m%}>>%{[0m%}"
 export PATH=$HOME/bin:$HOME/java/bin:$PATH
 export HISTSIZE=2000
 export SAVEHIST=3000
