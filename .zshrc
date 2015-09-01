@@ -1,5 +1,16 @@
 unsetopt GLOBAL_RCS
 
+function psdir()
+{
+    if [ $# -ne 1 ]; then
+        echo "Usage: psdir <process_name>"
+        return
+    fi
+    for pid in `ps -e | grep $1 | awk '{print $1}'`; do
+        sudo ls -l /proc/${pid}/exe | awk "{print $pid \"\\t\" \$11}"
+    done
+}
+
 PROMPT="%{[1;36m%}%n%{[35m%}@%{[36m%}%M  %{[32m%}%/
 %(?..%{[0m%}%? )%{[1;31m%}>>%{[0m%}"
 export PATH=$HOME/bin:$HOME/java/bin:$PATH
