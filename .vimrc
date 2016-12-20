@@ -1,84 +1,145 @@
 set nocompatible
+filetype off
+set runtimepath+=~/.vim/bundle/Vundle.vim
+runtime autoload/vundle.vim
+
+function! Start_Vundle()
+    call vundle#begin()
+    Plugin 'VundleVim/Vundle.vim'
+    Plugin 'ervandew/supertab'
+    Plugin 'ctrlpvim/ctrlp.vim'
+    Plugin 'scrooloose/nerdcommenter'
+    Plugin 'terryma/vim-multiple-cursors'
+    Plugin 'ntpeters/vim-better-whitespace'
+    call vundle#end()
+    let g:vundle_installed = 1
+endfunction
+
+function! Install_Vundle()
+    echomsg "Installing Vundle..."
+    if executable("git")
+        execute "!git clone https://github.com/VundleVim/Vundle.vim.git ~/.vim/bundle/Vundle.vim"
+        if v:shell_error
+            echomsg "Failed to install: can't clone repo. Please install Vundle manually."
+            echomsg "All plugins are disabled."
+        else
+            echomsg "Vundle has been installed."
+            call Start_Vundle()
+            autocmd VimEnter * PluginInstall
+        endif
+    else
+        echomsg "Failed to install: git not found. Install git and try again."
+        echomsg "All plugins are disabled."
+    endif
+endfunction
+
+if exists("*vundle#rc")
+    call Start_Vundle()
+else
+    call Install_Vundle()
+endif
+
 set fileencodings=utf-8,gbk,gb18030
 set shortmess=atI
 set tabstop=4
 set softtabstop=4
 set shiftwidth=4
 set autoindent
-set smartindent
 set number
 set expandtab
 set showcmd
 set incsearch
+set ignorecase
 set showmatch
-set cryptmethod=blowfish
 set cursorline
+set wildmenu
+set showtabline=2
+set laststatus=2
+
+set statusline=
+set statusline+=%1*%<%F
+set statusline+=\ %2*\ %{'['.(&filetype!=''?&filetype:'none').']'}
+set statusline+=\ %{''.(&fenc!=''?&fenc:&enc).''}%{(&bomb?\",bom\":\"\")}
+set statusline+=\ %{&fileformat}
+set statusline+=\ %0*%=%2*\ Ln\ %l/%L\ Col\ %c
+set statusline+=\ %1*%m%r%w\ %P\ %0*
+highlight User1 ctermbg=Yellow ctermfg=DarkGrey
+highlight User2 ctermbg=Blue ctermfg=White
+
 syntax on
 filetype plugin indent on
-highlight colorcolumn ctermbg=grey ctermfg=darkblue
-highlight cursorline cterm=none ctermfg=white ctermbg=darkblue
-highlight pmenu ctermbg=lightmagenta ctermfg=white
-highlight pmenusel ctermbg=lightgreen ctermfg=white
+highlight TabLine ctermbg=Yellow ctermfg=DarkGrey
+highlight TabLineSel ctermbg=Blue ctermfg=White
+highlight TabLineFill ctermbg=Blue ctermfg=LightGrey
+highlight ColorColumn ctermbg=grey ctermfg=darkblue
+highlight CursorLine cterm=none ctermfg=white ctermbg=darkblue
+highlight Pmenu ctermbg=lightmagenta ctermfg=white
+highlight PmenuSel ctermbg=lightgreen ctermfg=white
+highlight PmenuSbar ctermbg=lightmagenta
+highlight PmenuThumb ctermbg=yellow
 highlight Comment ctermfg=lightblue
 
-nmap <F2> :!
-nmap <F8> :!gdb ./
-nmap <F9> :make<CR>
-nmap <F10> :make clean<CR>
-nmap <F12> :!ctags -R --c++-kinds=+p --fields=+iaS --extra=+q "$@"<CR>
-nmap <Tab> <C-w>w
-nmap wm :WMToggle<CR>:echo "Window Manager Toggled"<CR>
-nmap tm :echo strftime("Time: %Y-%m-%d %H:%M:%S")<CR>
-nmap sh :!./
-nmap bb :b
-nmap sc :call Set_colorcolumn()<CR>
-nmap sz :call Set_foldmethod()<CR>
-nmap si :call Set_indent()<CR>
+let mapleader = ","
+nmap <leader>c :call Set_ColorColumn()<CR>
+nmap <leader>z :call Set_FoldMethod()<CR>
+nmap <leader>i :call Set_AutoIndent()<CR>
+nmap <silent> <leader>p :call PasteMode()<CR>
+nmap <silent> <leader>op :normal o<CR>:call PasteMode()<CR>
+nnoremap <C-Tab> gt
+nnoremap <C-S-Tab> gT
 
-let Tlist_Show_One_File=0
-let Tlist_Exit_OnlyWindow=1
-let Tlist_File_Fold_Auto_Close=1
-let g:winManagerWindowLayout='FileExplorer|TagList|BufExplorer'
-let g:winManagerWidth=30
-let g:SuperTabRetainCompletionType=2
-let g:NERDTree_title = "[NERDTree]"
-function! NERDTree_Start()
-    exe 'NERDTree'
-endfunction
-function! NERDTree_IsValid()
-    return 1
-endfunction
+if !exists("g:autocmd_vimrc")
+    let g:autocmd_vimrc = 1
+    autocmd! InsertLeave * set nopaste
+    autocmd! BufWritePost $MYVIMRC source %
+    command! P r !cat
+    if exists("*strftime")
+        command! Time echo strftime("Time: %F %a %T")
+    endif
+endif
 
-function Set_colorcolumn()
+function! Set_ColorColumn()
     if &colorcolumn == "81"
         set colorcolumn=
-        echo "Set No ColorColumn"
+        echo "ColorColumn Off"
     else
         set colorcolumn=81
-        echo "Set ColorColumn"
+        echo "ColorColumn On"
     endif
 endfunction
-function Set_foldmethod()
+function! Set_FoldMethod()
     if &foldmethod == "indent"
         set foldmethod=manual
         normal zR
-        echo "Set No Fold"
+        echo "Fold Off"
     else
         set foldmethod=indent
         normal zM
-        echo "Set Fold"
+        echo "Fold On"
     endif
 endfunction
-function Set_indent()
-    if &cindent
-        set nocindent
-        set nosmartindent
+function! Set_AutoIndent()
+    if &autoindent
         set noautoindent
-        echo "Set No AutoIndent"
+        echo "AutoIndent Off"
     else
-        set cindent
-        set smartindent
         set autoindent
-        echo "Set AutoIndent"
+        echo "AutoIndent On"
     endif
 endfunction
+function! PasteMode()
+    set paste
+    startinsert
+endfunction
+
+if exists("g:vundle_installed")
+    nmap <leader><leader>p :PluginInstall<CR>
+    nmap <leader><space><space> :StripWhitespace<CR>:echo "Whitespace Cleared!"<CR>
+    let g:ctrlp_map = '<C-p>'
+    let g:ctrlp_cmd = 'CtrlP'
+    let g:ctrlp_working_path_mode = 'ra'
+    let g:ctrlp_custom_ignore = {
+    \ 'dir':  '\v[\/]\.(git|hg|svn|rvm)$',
+    \ 'file': '\v\.(exe|so|dll|zip|tar|tar.gz|pyc|pyo|pyd)$',
+    \ }
+endif
