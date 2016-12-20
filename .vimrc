@@ -134,6 +134,9 @@ endfunction
 
 if exists("g:vundle_installed")
     nmap <leader><leader>p :PluginInstall<CR>
+    nmap <leader><leader>pc :PluginClean<CR>
+    nmap <leader><leader>pl :PluginList<CR>
+    nmap <leader><leader>pu :PluginUpdate<CR>
     nmap <leader><space><space> :StripWhitespace<CR>:echo "Whitespace Cleared!"<CR>
     let g:ctrlp_map = '<C-p>'
     let g:ctrlp_cmd = 'CtrlP'
