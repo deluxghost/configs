@@ -1,5 +1,5 @@
 " Do not modify version
-let g:my_vimrc_version = "1.1.0"
+let g:my_vimrc_version = "1.1.2"
 let g:my_vimrc_version_file = $HOME . "/.vim/vimrc.version"
 
 " Use Vim instead of Vi
