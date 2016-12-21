@@ -1,3 +1,7 @@
+" Do not modify version
+let g:my_vimrc_version = "1.1.0"
+let g:my_vimrc_version_file = $HOME . "/.vim/vimrc.version"
+
 " Use Vim instead of Vi
 set nocompatible
 " Load Vundle runtime
@@ -41,6 +45,13 @@ endfunction
 " Check and install Vundle on first time
 if exists("*vundle#rc")
     call Start_Vundle()
+    " Check vimrc version and update plugins
+    silent! let vimrc_file_version = readfile(g:my_vimrc_version_file, "", 1)
+    let vimrc_old_version = (len(vimrc_file_version) > 0 ? vimrc_file_version[0] : "")
+    if vimrc_old_version != g:my_vimrc_version
+        autocmd VimEnter * PluginInstall
+        call writefile([g:my_vimrc_version], g:my_vimrc_version_file)
+    endif
 else
     call Install_Vundle()
 endif
@@ -147,20 +158,19 @@ inoremap <Down> <C-o>gj
 inoremap <Up> <C-o>gk
 
 " Declare commands and auto commands
-if !exists("g:autocmd_vimrc")
-    let g:autocmd_vimrc = 1
-    " Disable PasteMode automatically
-    autocmd! InsertLeave * setlocal nopaste
-    " Reload VIMRC automatically
-    autocmd! BufWritePost $MYVIMRC source %
-    " Jump to the last edit position
-    autocmd! BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | execute "normal! g`\"" | endif
-    " Alternative of PasteMode, Ctrl-D to confirm
-    command! P r !cat
-    " Tell you the time
-    if exists("*strftime")
-        command! Time echo strftime("Time: %F %a %T")
-    endif
+"  Disable PasteMode automatically
+autocmd! InsertLeave * setlocal nopaste
+"  Reload VIMRC automatically
+autocmd! BufWritePost $MYVIMRC source %
+"  Jump to the last edit position
+autocmd! BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | execute "normal! g`\"" | endif
+"  Show my vimrc version
+command! Ver echo g:my_vimrc_version
+"  Alternative of PasteMode, Ctrl-D to confirm
+command! P r !cat
+"  Tell you the time
+if exists("*strftime")
+    command! Time echo strftime("Time: %F %a %T")
 endif
 
 " Toggle 80 column ruler
