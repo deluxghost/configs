@@ -12,6 +12,7 @@ function! Start_Vundle()
     Plugin 'ervandew/supertab'
     Plugin 'ctrlpvim/ctrlp.vim'
     Plugin 'scrooloose/nerdcommenter'
+    Plugin 'easymotion/vim-easymotion'
     Plugin 'terryma/vim-multiple-cursors'
     Plugin 'ntpeters/vim-better-whitespace'
     call vundle#end()
@@ -46,6 +47,10 @@ endif
 
 " Detect file encoding automatically
 set fileencodings=utf-8,gbk,gb18030
+" Detect file format automatically
+set fileformats=unix,dos,mac
+" Remove unused buffer
+set nohidden
 " How many lines of history can vim remember
 set history=700
 " Disable welcome message
@@ -54,14 +59,16 @@ set shortmess=atI
 set tabstop=4
 set softtabstop=4
 set shiftwidth=4
+" Use spaces instead of tabs
+set expandtab
+" Smarter tab
+set smarttab
 " Reload when a file is changed outside
 set autoread
 " Enable auto indent
 set autoindent
 " Show line number
 set number
-" Use space instead of tab
-set expandtab
 " Show command at the last line
 set showcmd
 " Show search matches dynamically
@@ -80,8 +87,6 @@ set cursorline
 set wildmenu
 " Ignore compiled files
 set wildignore=*.o,*~,*.pyc,*.pyo
-" Arrow keys can wrap line on insert mode
-set whichwrap=b,s,[,]
 " Show tab bar
 set showtabline=2
 " Show status bar
@@ -89,17 +94,17 @@ set laststatus=2
 
 " Set the format of status bar
 set statusline=
-" Filename
+"  Filename
 set statusline+=%1*%<%F
-" Filetype, encoding and file format (line-ending)
+"  Filetype, encoding and file format (line-ending)
 set statusline+=\ %2*\ %{'['.(&filetype!=''?&filetype:'none').']'}
 set statusline+=\ %{''.(&fenc!=''?&fenc:&enc).''}%{(&bomb?\",bom\":\"\")}
 set statusline+=\ %{&fileformat}
-" Line and column number
+"  Line and column number
 set statusline+=\ %0*%=%2*\ Ln\ %l/%L\ Col\ %c
-" Modified, readonly, preview and others
+"  Modified, readonly, preview and ruler
 set statusline+=\ %1*%m%r%w\ %P\ %0*
-" Highlight status bar
+"  Highlight status bar
 highlight User1 ctermbg=Yellow ctermfg=DarkGrey
 highlight User2 ctermbg=Blue ctermfg=White
 
@@ -126,25 +131,30 @@ highlight Comment ctermfg=lightblue
 let mapleader = ","
 let g:mapleader = ","
 " General mapping
-" Toggles
+"  Toggles
 nmap <leader>c :call Set_ColorColumn()<CR>
 nmap <leader>z :call Set_FoldMethod()<CR>
 nmap <leader>i :call Set_AutoIndent()<CR>
-" Go PasteMode
+"  Go PasteMode
 nmap <silent> <leader>p :call PasteMode()<CR>
-" Go PasteMode from a new line
+"  Go PasteMode from a new line
 nmap <silent> <leader>op :normal o<CR>:call PasteMode()<CR>
-" Switch tabs
+"  Switch tabs
 nnoremap <C-Tab> gt
 nnoremap <C-S-Tab> gT
+"  Arrow keys moving in wrapped lines
+inoremap <Down> <C-o>gj
+inoremap <Up> <C-o>gk
 
 " Declare commands and auto commands
 if !exists("g:autocmd_vimrc")
     let g:autocmd_vimrc = 1
     " Disable PasteMode automatically
-    autocmd! InsertLeave * set nopaste | nohlsearch
+    autocmd! InsertLeave * setlocal nopaste
     " Reload VIMRC automatically
     autocmd! BufWritePost $MYVIMRC source %
+    " Jump to the last edit position
+    autocmd! BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | execute "normal! g`\"" | endif
     " Alternative of PasteMode, Ctrl-D to confirm
     command! P r !cat
     " Tell you the time
@@ -212,3 +222,4 @@ if exists("g:vundle_installed")
     \ 'file': '\v\.(exe|so|dll|zip|tar|tar.gz|pyc|pyo|pyd)$',
     \ }
 endif
+
