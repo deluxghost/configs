@@ -97,7 +97,9 @@ set cursorline
 " Auto completion of command-line
 set wildmenu
 " Ignore compiled files
-set wildignore=*.o,*~,*.pyc,*.pyo
+set wildignore=*.o,*~,*.pyc,*.pyo,*.pyd
+" Ignore project directories
+set wildignore+=*/.git/*,*/.hg/*,*/.svn/*,*/.DS_Store
 " Show tab bar
 set showtabline=2
 " Show status bar
@@ -228,7 +230,7 @@ if exists("g:vundle_installed")
     let g:ctrlp_cmd = 'CtrlP'
     let g:ctrlp_working_path_mode = 'ra'
     let g:ctrlp_custom_ignore = {
-    \ 'dir':  '\v[\/]\.(git|hg|svn|rvm)$',
+    \ 'dir':  '\v[\/]\.(git|hg|svn|rvm|DS_Store)$',
     \ 'file': '\v\.(exe|so|dll|zip|tar|tar.gz|pyc|pyo|pyd)$',
     \ }
 endif
