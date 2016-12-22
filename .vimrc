@@ -1,6 +1,19 @@
 " Do not modify version
-let g:my_vimrc_version = "1.1.2"
-let g:my_vimrc_version_file = $HOME . "/.vim/vimrc.version"
+let g:my_vimrc_version = "1.2.0"
+
+" Necessary settings
+let g:my_vimrc_repo = "https://github.com/deluxghost/configs"
+let g:my_vimrc_update = "https://raw.githubusercontent.com/deluxghost/configs/master/.vimrc"
+let g:my_vimrc_settings = $HOME . "/.vim/my_vimrc/"
+let g:my_vimrc_version_file = g:my_vimrc_settings . "vimrc.version"
+let g:my_vimrc_update_file = g:my_vimrc_settings . "vimrc.update"
+let g:my_vimrc_curl_able = executable("curl") ? "curl" : executable("wget") ? "wget" : ""
+if !isdirectory(g:my_vimrc_settings)
+    call mkdir(g:my_vimrc_settings, "p")
+endif
+if !empty(glob(g:my_vimrc_settings . ".noupdate"))
+    let g:my_vimrc_curl_able = ""
+endif
 
 " Use Vim instead of Vi
 set nocompatible
@@ -42,6 +55,14 @@ function! Install_Vundle()
     endif
 endfunction
 
+function! Check_Vimrc_Update()
+    if g:my_vimrc_curl_able == "curl"
+        silent! execute "!curl -s -o ".g:my_vimrc_update_file." ".g:my_vimrc_update." &" | redraw!
+    elseif g:my_vimrc_curl_able == "wget"
+        silent! execute "!wget -q -O ".g:my_vimrc_update_file." ".g:my_vimrc_update." &" | redraw!
+    endif
+endfunction
+
 " Check and install Vundle on first time
 if exists("*vundle#rc")
     call Start_Vundle()
@@ -54,6 +75,23 @@ if exists("*vundle#rc")
     endif
 else
     call Install_Vundle()
+endif
+
+" Check vimrc update
+if !empty(g:my_vimrc_curl_able)
+    silent! let vimrc_file_update = readfile(g:my_vimrc_update_file, "", 3)
+    let vimrc_new = ""
+    for line in vimrc_file_update
+        let vermatch = matchstr(line, '^let g:my_vimrc_version = "\zs.\{-}\ze"$')
+        if !empty(vermatch)
+            let vimrc_new = vermatch
+        endif
+    endfor
+    if !empty(vimrc_new) && vimrc_new != g:my_vimrc_version
+        echomsg "New vimrc found: " . vimrc_new . " | Your version: " . g:my_vimrc_version
+        echomsg "Update at " . g:my_vimrc_repo
+        echomsg "Or copy `" . substitute(g:my_vimrc_update_file, $HOME, "~", "") . "' to overwrite your `~/.vimrc'."
+    endif
 endif
 
 " Detect file encoding automatically
@@ -74,6 +112,8 @@ set shiftwidth=4
 set expandtab
 " Smarter tab
 set smarttab
+" Don't break line
+set textwidth=0
 " Reload when a file is changed outside
 set autoread
 " Enable auto indent
@@ -160,6 +200,8 @@ inoremap <Down> <C-o>gj
 inoremap <Up> <C-o>gk
 
 " Declare commands and auto commands
+"  Check vimrc update
+autocmd! VimEnter * call Check_Vimrc_Update()
 "  Disable PasteMode automatically
 autocmd! InsertLeave * setlocal nopaste
 "  Reload VIMRC automatically
@@ -171,9 +213,7 @@ command! Ver echo g:my_vimrc_version
 "  Alternative of PasteMode, Ctrl-D to confirm
 command! P r !cat
 "  Tell you the time
-if exists("*strftime")
-    command! Time echo strftime("Time: %F %a %T")
-endif
+command! Time echo strftime("Time: %F %a %T")
 
 " Toggle 80 column ruler
 function! Set_ColorColumn()
@@ -218,7 +258,7 @@ endfunction
 
 " If Vundle loaded successfully
 if exists("g:vundle_installed")
-    " Vundle mapping
+    " Vundle mappings
     nmap <leader><leader>p :PluginInstall<CR>
     nmap <leader><leader>pc :PluginClean<CR>
     nmap <leader><leader>pl :PluginList<CR>
