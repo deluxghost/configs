@@ -1,5 +1,5 @@
 " Do not modify version
-let g:my_vimrc_version = "1.2.1"
+let g:my_vimrc_version = "1.2.2"
 
 " Necessary settings
 let g:my_vimrc_repo = "https://github.com/deluxghost/configs"
@@ -21,12 +21,14 @@ set nocompatible
 filetype off
 set runtimepath+=~/.vim/bundle/Vundle.vim
 runtime autoload/vundle.vim
+let g:need_plugin_install = 0
 
 " Init Vundle and load plugins
 function! Start_Vundle()
     call vundle#begin()
     Plugin 'VundleVim/Vundle.vim'
     Plugin 'ervandew/supertab'
+    Plugin 'tpope/vim-surround'
     Plugin 'ctrlpvim/ctrlp.vim'
     Plugin 'scrooloose/nerdcommenter'
     Plugin 'easymotion/vim-easymotion'
@@ -51,7 +53,7 @@ function! Install_Vundle()
         else
             echomsg "Vundle has been installed."
             call Start_Vundle()
-            autocmd VimEnter * PluginInstall
+            let g:need_plugin_install = 1
         endif
     else
         echomsg "Failed to install: git not found. Install git and try again."
@@ -59,7 +61,12 @@ function! Install_Vundle()
     endif
 endfunction
 
-function! Check_Vimrc_Update()
+function! Enter_Init()
+    " Install plugins
+    if g:need_plugin_install
+        PluginInstall
+    endif
+    " Check vimrc update
     if g:my_vimrc_curl_able == "curl"
         silent! execute "!curl -s -o ".g:my_vimrc_update_file." ".g:my_vimrc_update." &" | redraw!
     elseif g:my_vimrc_curl_able == "wget"
@@ -74,12 +81,12 @@ if exists("*vundle#rc")
     silent! let vimrc_file_version = readfile(g:my_vimrc_version_file, "", 1)
     let vimrc_old_version = (len(vimrc_file_version) > 0 ? vimrc_file_version[0] : "")
     if vimrc_old_version != g:my_vimrc_version
-        autocmd VimEnter * PluginInstall
-        call writefile([g:my_vimrc_version], g:my_vimrc_version_file)
+        let g:need_plugin_install = 1
     endif
 else
     call Install_Vundle()
 endif
+call writefile([g:my_vimrc_version], g:my_vimrc_version_file)
 
 " Check vimrc update
 if !empty(g:my_vimrc_curl_able)
@@ -204,8 +211,8 @@ inoremap <Down> <C-o>gj
 inoremap <Up> <C-o>gk
 
 " Declare commands and auto commands
-"  Check vimrc update
-autocmd! VimEnter * call Check_Vimrc_Update()
+"  Do after vim loaded
+autocmd! VimEnter * call Enter_Init()
 "  Disable PasteMode automatically
 autocmd! InsertLeave * setlocal nopaste
 "  Reload VIMRC automatically
@@ -215,7 +222,9 @@ autocmd! BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | execute 
 "  Show my vimrc version
 command! Ver echo g:my_vimrc_version
 "  Alternative of PasteMode, Ctrl-D to confirm
-command! P r !cat
+if executable("cat")
+    command! P r !cat
+endif
 "  Tell you the time
 command! Time echo strftime("Time: %F %a %T")
 
@@ -264,6 +273,7 @@ endfunction
 if exists("g:vundle_installed")
     " Vundle mappings
     nmap <leader><leader>p :PluginInstall<CR>
+    nmap <leader><leader>pi :PluginInstall<CR>
     nmap <leader><leader>pc :PluginClean<CR>
     nmap <leader><leader>pl :PluginList<CR>
     nmap <leader><leader>pu :PluginUpdate<CR>
