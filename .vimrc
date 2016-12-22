@@ -1,5 +1,5 @@
 " Do not modify version
-let g:my_vimrc_version = "1.2.0"
+let g:my_vimrc_version = "1.2.1"
 
 " Necessary settings
 let g:my_vimrc_repo = "https://github.com/deluxghost/configs"
@@ -40,6 +40,10 @@ endfunction
 function! Install_Vundle()
     echomsg "Installing Vundle..."
     if executable("git")
+        let vundle_cwd = $HOME . "/.vim/bundle/Vundle.vim"
+        if !isdirectory(vundle_cwd)
+            call mkdir(vundle_cwd, "p")
+        endif
         execute "!git clone https://github.com/VundleVim/Vundle.vim.git ~/.vim/bundle/Vundle.vim"
         if v:shell_error
             echomsg "Failed to install: can't clone repo. Please install Vundle manually."
