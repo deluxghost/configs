@@ -1,31 +1,59 @@
 " Do not modify version
-let g:my_vimrc_version = "1.2.2"
+let g:my_vimrc_version = "1.3.0"
 
 " Necessary settings
+let g:my_vimrc_windows = 0
+if has("win32") || has("win64") || has("win16")
+    let g:my_vimrc_windows = 1
+    if !executable("git") || !executable("curl")
+        let g:my_vimrc_windows = 2
+        echomsg "Vundle needs git and curl to work."
+        echomsg "How to install git and curl on Windows: "
+        echomsg "https://github.com/VundleVim/Vundle.vim/wiki/Vundle-for-Windows"
+    endif
+endif
 let g:my_vimrc_repo = "https://github.com/deluxghost/configs"
 let g:my_vimrc_update = "https://raw.githubusercontent.com/deluxghost/configs/master/.vimrc"
-let g:my_vimrc_settings = $HOME . "/.vim/my_vimrc/"
+if g:my_vimrc_windows
+    let g:my_vimrc_vim = $HOME . "/vimfiles/"
+else
+    let g:my_vimrc_vim = $HOME . "/.vim/"
+endif
+let g:my_vimrc_settings = g:my_vimrc_vim . "my_vimrc/"
 let g:my_vimrc_version_file = g:my_vimrc_settings . "vimrc.version"
 let g:my_vimrc_update_file = g:my_vimrc_settings . "vimrc.update"
-let g:my_vimrc_curl_able = executable("curl") ? "curl" : executable("wget") ? "wget" : ""
+let g:my_vimrc_updatable = executable("curl") ? "curl" : executable("wget") ? "wget" : ""
 if !isdirectory(g:my_vimrc_settings)
     call mkdir(g:my_vimrc_settings, "p")
 endif
-if !empty(glob(g:my_vimrc_settings . ".noupdate"))
-    let g:my_vimrc_curl_able = ""
+if !empty(glob(g:my_vimrc_settings . ".noupdate")) || !empty(glob(g:my_vimrc_settings . "_noupdate"))
+    let g:my_vimrc_updatable = ""
+endif
+if has("gui_running")
+    let g:my_vimrc_gvim = 1
+else
+    let g:my_vimrc_gvim = 0
 endif
 
 " Use Vim instead of Vi
 set nocompatible
 " Load Vundle runtime
 filetype off
-set runtimepath+=~/.vim/bundle/Vundle.vim
+if g:my_vimrc_windows
+    set runtimepath+=$HOME/vimfiles/bundle/Vundle.vim/
+else
+    set runtimepath+=~/.vim/bundle/Vundle.vim
+endif
 runtime autoload/vundle.vim
 let g:need_plugin_install = 0
 
 " Init Vundle and load plugins
 function! Start_Vundle()
-    call vundle#begin()
+    if g:my_vimrc_windows
+        call vundle#begin('$USERPROFILE/vimfiles/bundle/')
+    else
+        call vundle#begin()
+    endif
     Plugin 'VundleVim/Vundle.vim'
     Plugin 'ervandew/supertab'
     Plugin 'tpope/vim-surround'
@@ -40,13 +68,18 @@ endfunction
 
 " Install Vundle automatically
 function! Install_Vundle()
-    echomsg "Installing Vundle..."
+    if g:my_vimrc_windows == 2
+        return
+    endif
+    if !g:my_vimrc_gvim
+        echomsg "Installing Vundle..."
+    endif
     if executable("git")
-        let vundle_cwd = $HOME . "/.vim/bundle/Vundle.vim"
+        let vundle_cwd = g:my_vimrc_vim . "bundle/Vundle.vim"
         if !isdirectory(vundle_cwd)
             call mkdir(vundle_cwd, "p")
         endif
-        execute "!git clone https://github.com/VundleVim/Vundle.vim.git ~/.vim/bundle/Vundle.vim"
+        execute "!git clone https://github.com/VundleVim/Vundle.vim.git " . vundle_cwd
         if v:shell_error
             echomsg "Failed to install: can't clone repo. Please install Vundle manually."
             echomsg "All plugins are disabled."
@@ -67,10 +100,17 @@ function! Enter_Init()
         PluginInstall
     endif
     " Check vimrc update
-    if g:my_vimrc_curl_able == "curl"
-        silent! execute "!curl -s -o ".g:my_vimrc_update_file." ".g:my_vimrc_update." &" | redraw!
-    elseif g:my_vimrc_curl_able == "wget"
-        silent! execute "!wget -q -O ".g:my_vimrc_update_file." ".g:my_vimrc_update." &" | redraw!
+    let update_cmd = ""
+    if g:my_vimrc_updatable == "curl"
+        let update_cmd = "!curl -s -o " . g:my_vimrc_update_file . " " . g:my_vimrc_update
+    elseif g:my_vimrc_updatable == "wget"
+        let update_cmd = "!wget -q -O " . g:my_vimrc_update_file . " " . g:my_vimrc_update
+    endif
+    if !empty(update_cmd)
+        if !g:my_vimrc_windows
+            let update_cmd = update_cmd . " &"
+        endif
+        silent execute update_cmd | redraw!
     endif
 endfunction
 
@@ -89,7 +129,7 @@ endif
 call writefile([g:my_vimrc_version], g:my_vimrc_version_file)
 
 " Check vimrc update
-if !empty(g:my_vimrc_curl_able)
+if !empty(g:my_vimrc_updatable)
     silent! let vimrc_file_update = readfile(g:my_vimrc_update_file, "", 3)
     let vimrc_new = ""
     for line in vimrc_file_update
@@ -101,7 +141,11 @@ if !empty(g:my_vimrc_curl_able)
     if !empty(vimrc_new) && vimrc_new != g:my_vimrc_version
         echomsg "New vimrc found: " . vimrc_new . " | Your version: " . g:my_vimrc_version
         echomsg "Update at " . g:my_vimrc_repo
-        echomsg "Or copy `" . substitute(g:my_vimrc_update_file, $HOME, "~", "") . "' to overwrite your `~/.vimrc'."
+        if g:my_vimrc_windows == 0
+            echomsg "Or copy `" . substitute(g:my_vimrc_update_file, $HOME, "~", "") . "' to overwrite your `~/.vimrc'."
+        else
+            echomsg "Or copy `" . substitute(g:my_vimrc_update_file, $HOME, "$HOME", "") . "' to overwrite your `$HOME/.vimrc'."
+        endif
     endif
 endif
 
@@ -115,6 +159,8 @@ set nohidden
 set history=700
 " Disable welcome message
 set shortmess=atI
+" Ensure backspace work
+set backspace=indent,eol,start
 " Set width of tab to 4
 set tabstop=4
 set softtabstop=4
@@ -156,6 +202,35 @@ set showtabline=2
 " Show status bar
 set laststatus=2
 
+" GVim Settings
+if g:my_vimrc_gvim
+    colorscheme evening
+    set guioptions+=c
+    set guioptions-=T
+    set guioptions-=m
+    set guioptions-=e
+else
+    colorscheme default
+endif
+" Enable syntax highlighting
+syntax on
+" Enable filetype plugins and indents
+filetype plugin indent on
+" Highlight tab bar
+highlight TabLine ctermbg=Yellow ctermfg=DarkGrey guibg=Yellow guifg=DarkGrey
+highlight TabLineSel ctermbg=Blue ctermfg=White guibg=Blue guifg=White
+highlight TabLineFill ctermbg=Blue ctermfg=LightGrey guibg=Blue guifg=LightGrey
+" Highlight color column and current line
+highlight ColorColumn ctermbg=Grey ctermfg=DarkBlue guibg=Grey guifg=DarkBlue
+highlight CursorLine cterm=none ctermbg=DarkBlue ctermfg=White gui=none guibg=Blue guifg=White
+" Highlight popup menu
+highlight Pmenu ctermbg=LightMagenta ctermfg=White guibg=LightMagenta guifg=White
+highlight PmenuSel ctermbg=LightGreen ctermfg=White guibg=LightGreen guifg=White
+highlight PmenuSbar ctermbg=LightMagenta guibg=LightMagenta
+highlight PmenuThumb ctermbg=Yellow guibg=Yellow
+" Highlight comment
+highlight Comment ctermfg=LightBlue guifg=LightBlue
+
 " Set the format of status bar
 set statusline=
 "  Filename
@@ -169,27 +244,11 @@ set statusline+=\ %0*%=%2*\ Ln\ %l/%L\ Col\ %c
 "  Modified, readonly, preview and ruler
 set statusline+=\ %1*%m%r%w\ %P\ %0*
 "  Highlight status bar
-highlight User1 ctermbg=Yellow ctermfg=DarkGrey
-highlight User2 ctermbg=Blue ctermfg=White
-
-" Enable syntax highlighting
-syntax on
-" Enable filetype plugins and indents
-filetype plugin indent on
-" Highlight tab bar
-highlight TabLine ctermbg=Yellow ctermfg=DarkGrey
-highlight TabLineSel ctermbg=Blue ctermfg=White
-highlight TabLineFill ctermbg=Blue ctermfg=LightGrey
-" Highlight color column and current line
-highlight ColorColumn ctermbg=grey ctermfg=darkblue
-highlight CursorLine cterm=none ctermfg=white ctermbg=darkblue
-" Highlight popup menu
-highlight Pmenu ctermbg=lightmagenta ctermfg=white
-highlight PmenuSel ctermbg=lightgreen ctermfg=white
-highlight PmenuSbar ctermbg=lightmagenta
-highlight PmenuThumb ctermbg=yellow
-" Highlight comment
-highlight Comment ctermfg=lightblue
+function! HL_StatusBar()
+    highlight User1 ctermbg=Yellow ctermfg=DarkGrey guibg=Yellow guifg=DarkGrey
+    highlight User2 ctermbg=Blue ctermfg=White guibg=Blue guifg=White
+endfunction
+call HL_StatusBar()
 
 " Set map leader
 let mapleader = ","
@@ -215,6 +274,8 @@ inoremap <Up> <C-o>gk
 autocmd! VimEnter * call Enter_Init()
 "  Disable PasteMode automatically
 autocmd! InsertLeave * setlocal nopaste
+"  Reload statusbar highlight automatically
+autocmd! ColorScheme * call HL_StatusBar()
 "  Reload VIMRC automatically
 autocmd! BufWritePost $MYVIMRC source %
 "  Jump to the last edit position
