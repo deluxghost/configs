@@ -1,5 +1,5 @@
 " Do not modify version
-let g:my_vimrc_version = "1.3.0"
+let g:my_vimrc_version = "1.4.0"
 
 " Necessary settings
 let g:my_vimrc_windows = 0
@@ -19,6 +19,7 @@ if g:my_vimrc_windows
 else
     let g:my_vimrc_vim = $HOME . "/.vim/"
 endif
+let g:vundle_installed = 0
 let g:my_vimrc_settings = g:my_vimrc_vim . "my_vimrc/"
 let g:my_vimrc_version_file = g:my_vimrc_settings . "vimrc.version"
 let g:my_vimrc_update_file = g:my_vimrc_settings . "vimrc.update"
@@ -62,6 +63,12 @@ function! Start_Vundle()
     Plugin 'easymotion/vim-easymotion'
     Plugin 'terryma/vim-multiple-cursors'
     Plugin 'ntpeters/vim-better-whitespace'
+    let vimrc_plugin_name = [".vim.plugin", "_vim.plugin", ".vimrc.plugin", "_vimrc.plugin"]
+    for name in vimrc_plugin_name
+        if filereadable($HOME . "/" . name)
+            execute "source " . $HOME . "/" . name
+        endif
+    endfor
     call vundle#end()
     let g:vundle_installed = 1
 endfunction
@@ -194,7 +201,9 @@ set cursorline
 " Auto completion of command-line
 set wildmenu
 " Ignore compiled files
-set wildignore=*.o,*~,*.pyc,*.pyo,*.pyd
+set wildignore=*.a,*.o,*.so,*~,*.pyc,*.class
+set wildignore+=*.bak,*.swp,*.swo
+set wildignore+=*.jpg,*.jpeg,*.gif,*.png,*.pdf
 " Ignore project directories
 set wildignore+=*/.git/*,*/.hg/*,*/.svn/*,*/.DS_Store
 " Show tab bar
@@ -257,7 +266,6 @@ let g:mapleader = ","
 "  Toggles
 nmap <leader>c :call Set_ColorColumn()<CR>
 nmap <leader>z :call Set_FoldMethod()<CR>
-nmap <leader>i :call Set_AutoIndent()<CR>
 "  Go PasteMode
 nmap <silent> <leader>p :call PasteMode()<CR>
 "  Go PasteMode from a new line
@@ -313,17 +321,6 @@ function! Set_FoldMethod()
     endif
 endfunction
 
-" Toggle auto indent
-function! Set_AutoIndent()
-    if &autoindent
-        set noautoindent
-        echo "AutoIndent Off"
-    else
-        set autoindent
-        echo "AutoIndent On"
-    endif
-endfunction
-
 " Enter PasteMode (:set paste)
 function! PasteMode()
     set paste
@@ -331,7 +328,7 @@ function! PasteMode()
 endfunction
 
 " If Vundle loaded successfully
-if exists("g:vundle_installed")
+if g:vundle_installed
     " Vundle mappings
     nmap <leader><leader>p :PluginInstall<CR>
     nmap <leader><leader>pi :PluginInstall<CR>
@@ -346,7 +343,13 @@ if exists("g:vundle_installed")
     let g:ctrlp_working_path_mode = 'ra'
     let g:ctrlp_custom_ignore = {
     \ 'dir':  '\v[\/]\.(git|hg|svn|rvm|DS_Store)$',
-    \ 'file': '\v\.(exe|so|dll|zip|tar|tar.gz|pyc|pyo|pyd)$',
+    \ 'file': '\v\.(exe|so|dll|zip|tar|tar.gz|pyc)$',
     \ }
 endif
 
+let vimrc_name = [".vimrc2", "_vimrc2", ".vimrc.user", "_vimrc.user"]
+for name in vimrc_name
+    if filereadable($HOME . "/" . name)
+        execute "source " . $HOME . "/" . name
+    endif
+endfor
