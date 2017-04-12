@@ -1,5 +1,5 @@
 " Do not modify version
-let g:my_vimrc_version = "1.5.0"
+let g:my_vimrc_version = "1.5.1"
 
 " Necessary settings
 let g:my_vimrc_windows = 0
@@ -275,8 +275,11 @@ let g:mapleader = ","
 "  Column 80 ruler
 nmap <leader>c :call Set_ColorColumn()<CR>
 "  Go PasteMode
-nmap <silent> <leader>p :normal o<CR>:call PasteMode()<CR>
-nmap <silent> <leader>P :normal O<CR>:call PasteMode()<CR>
+"  Go PasteMode
+nmap <silent> <leader>p :call PasteMode()<CR>
+"  Go PasteMode at newline
+nmap <silent> <leader>op :normal o<CR>:call PasteMode()<CR>
+nmap <silent> <leader>OP :normal O<CR>:call PasteMode()<CR>
 "  Switch tabs
 nnoremap <C-Tab> gt
 nnoremap <C-S-Tab> gT
