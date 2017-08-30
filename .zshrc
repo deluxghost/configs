@@ -1,5 +1,11 @@
 unsetopt GLOBAL_RCS
 
+function is_wsl()
+{
+    grep -q Microsoft /proc/version
+    return $?
+}
+
 function psdir()
 {
     if [ $# -ne 1 ]; then
@@ -11,9 +17,16 @@ function psdir()
     done
 }
 
-PROMPT="%{[1;36m%}%n%{[35m%}@%{[36m%}%M  %{[32m%}%/
-%(?..%{[0m%}%? )%{[1;31m%}>>%{[0m%}"
-export PATH=$HOME/bin:$HOME/java/bin:$PATH
+if is_wsl; then
+    for i in {a..z}; do
+        hash -d $i=/mnt/$i
+    done
+fi
+
+PROMPT="%B%F{cyan}%n%F{magenta}@%F{cyan}%M  %F{green}%/%b%f
+%(?..%? )%B%F{red}>>%b%f"
+
+export PATH=$HOME/bin:$PATH
 export HISTSIZE=2000
 export SAVEHIST=3000
 export HISTFILE=~/.zhistory
@@ -22,6 +35,7 @@ setopt INC_APPEND_HISTORY
 setopt HIST_IGNORE_DUPS
 setopt HIST_IGNORE_SPACE
 setopt HIST_SAVE_NO_DUPS
+
 setopt AUTO_CD
 setopt AUTO_PUSHD
 setopt PUSHD_IGNORE_DUPS
@@ -29,7 +43,6 @@ setopt PUSHD_IGNORE_DUPS
 limit coredumpsize 0
 
 bindkey -e
-bindkey "\e[3~" delete-char
 WORDCHARS='*?_-[]~=&;!#$%^(){}<>'
 
 setopt AUTO_LIST
@@ -74,11 +87,10 @@ zstyle ':completion:*:options' description 'yes'
 zstyle ':completion:*:options' auto-description '%d'
 zstyle ':completion:*:descriptions' format $'\e[01;33m -- %d --\e[0m'
 zstyle ':completion:*:messages' format $'\e[01;35m -- %d --\e[0m'
-zstyle ':completion:*:warnings' format $'\e[01;31m -- No Matches Found --\e[0m'
 
-alias ls='ls -F --color=auto'
+alias ls='ls -F --color'
 alias ll='ls -l'
 alias la='ls -a'
 alias lla='ls -la'
-alias grep='grep --color=auto'
+alias grep='grep --color'
 alias rr='rm -r'
