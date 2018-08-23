@@ -23,6 +23,8 @@ antigen bundle zdharma/fast-syntax-highlighting
 antigen bundle zdharma/history-search-multi-word
 antigen apply
 
+OS="`uname`"
+
 function is_wsl()
 {
     grep -q Microsoft /proc/version &> /dev/null
@@ -39,7 +41,11 @@ export PATH=$PATH:~/bin
 
 alias esrc='vi $ZSH_CUSTOM/startup.zsh'
 alias resrc='source ~/.zshrc'
-alias ls='ls --color'
+if [[ "$OS" == "Darwin" || "$OS" == "FreeBSD" ]]; then
+    alias ls='ls -G'
+else
+    alias ls='ls --color'
+fi
 alias la='ls -a'
 alias ll='ls -l'
 alias lla='ls -la'
