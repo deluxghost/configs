@@ -23,7 +23,7 @@ antigen bundle zdharma/fast-syntax-highlighting
 antigen bundle zdharma/history-search-multi-word
 antigen apply
 
-OS="`uname`"
+export OS="`uname`"
 
 function is_wsl()
 {
@@ -39,7 +39,7 @@ function mcdir()
 export EDITOR=vim
 export PATH=$PATH:~/bin
 
-alias esrc='vi $ZSH_CUSTOM/startup.zsh'
+alias esrc='$EDITOR "$ZSH_CUSTOM/startup.zsh"'
 alias resrc='source ~/.zshrc'
 if [[ "$OS" == "Darwin" || "$OS" == "FreeBSD" ]]; then
     alias ls='ls -G'
