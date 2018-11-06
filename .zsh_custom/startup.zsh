@@ -37,7 +37,7 @@ function mcdir()
 }
 
 export EDITOR=vim
-export PATH=$PATH:~/bin
+export PATH=$PATH:/usr/local/bin:~/bin:~/.pyenv/shims
 
 alias esrc='$EDITOR "$ZSH_CUSTOM/startup.zsh"'
 alias resrc='source ~/.zshrc'
@@ -50,3 +50,6 @@ alias la='ls -a'
 alias ll='ls -l'
 alias lla='ls -la'
 alias rr='rm -r'
+alias py='ipython'
+
+eval "$(pyenv init -)"
