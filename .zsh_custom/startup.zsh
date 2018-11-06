@@ -36,8 +36,9 @@ function mcdir()
     mkdir -p -- "$1" && cd -P -- "$1"
 }
 
+export PYENV_ROOT=~/.pyenv
 export EDITOR=vim
-export PATH=$PATH:/usr/local/bin:~/bin:~/.pyenv/shims
+export PATH=$PATH:/usr/local/bin:~/bin:$PYENV_ROOT/bin:$PYENV_ROOT/shims
 
 alias esrc='$EDITOR "$ZSH_CUSTOM/startup.zsh"'
 alias resrc='source ~/.zshrc'
