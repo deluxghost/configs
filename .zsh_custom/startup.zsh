@@ -40,6 +40,10 @@ export PYENV_ROOT=~/.pyenv
 export EDITOR=vim
 export PATH=$PATH:/usr/local/bin:~/bin:$PYENV_ROOT/bin:$PYENV_ROOT/shims
 
+if command -v pyenv 1>/dev/null 2>&1; then
+    eval "$(pyenv init -)"
+fi
+
 alias esrc='$EDITOR "$ZSH_CUSTOM/startup.zsh"'
 alias resrc='source ~/.zshrc'
 if [[ "$OS" == "Darwin" || "$OS" == "FreeBSD" ]]; then
@@ -52,7 +56,3 @@ alias ll='ls -l'
 alias lla='ls -la'
 alias rr='rm -r'
 alias py='ipython'
-
-if command -v pyenv 1>/dev/null 2>&1; then
-    eval "$(pyenv init -)"
-fi
