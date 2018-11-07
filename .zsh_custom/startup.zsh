@@ -6,6 +6,15 @@ export UPDATE_ZSH_DAYS=5
 setopt noincappendhistory
 setopt nosharehistory
 
+
+function is_wsl()
+{
+    grep -q Microsoft /proc/version &> /dev/null
+    return $?
+}
+
+is_wsl && unsetopt BG_NICE
+
 source ~/bin/antigen.zsh
 antigen use oh-my-zsh
 antigen bundle git
@@ -24,12 +33,6 @@ antigen bundle zdharma/history-search-multi-word
 antigen apply
 
 export OS="`uname`"
-
-function is_wsl()
-{
-    grep -q Microsoft /proc/version &> /dev/null
-    return $?
-}
 
 function mcdir()
 {
