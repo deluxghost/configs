@@ -45,7 +45,7 @@ if command -v pyenv 1>/dev/null 2>&1; then
 fi
 
 alias esrc='$EDITOR "$ZSH_CUSTOM/startup.zsh"'
-alias resrc='source ~/.zshrc'
+alias resrc='exec zsh'
 if [[ "$OS" == "Darwin" || "$OS" == "FreeBSD" ]]; then
     alias ls='ls -G'
 else
