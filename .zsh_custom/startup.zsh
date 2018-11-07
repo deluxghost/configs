@@ -38,7 +38,7 @@ function mcdir()
 
 export PYENV_ROOT=~/.pyenv
 export EDITOR=vim
-export PATH=$PATH:/usr/local/bin:$PYENV_ROOT/bin:$PYENV_ROOT/shims:~/.cargo/bin:~/bin
+export PATH=$PATH:/usr/local/bin:$PYENV_ROOT/bin:$PYENV_ROOT/shims:~/.cargo/bin:~/.n/bin:~/bin
 
 if command -v pyenv 1>/dev/null 2>&1; then
     eval "$(pyenv init -)"
