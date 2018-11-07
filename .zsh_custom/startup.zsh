@@ -38,7 +38,7 @@ function mcdir()
 
 export PYENV_ROOT=~/.pyenv
 export EDITOR=vim
-export PATH=$PATH:/usr/local/bin:~/bin:$PYENV_ROOT/bin:$PYENV_ROOT/shims
+export PATH=$PATH:/usr/local/bin:$PYENV_ROOT/bin:$PYENV_ROOT/shims:~/.cargo/bin:~/bin
 
 if command -v pyenv 1>/dev/null 2>&1; then
     eval "$(pyenv init -)"
@@ -56,3 +56,6 @@ alias ll='ls -l'
 alias lla='ls -la'
 alias rr='rm -r'
 alias py='ipython'
+alias ee='exa'
+alias cat='bat --theme=TwoDark'
+alias ping='prettyping'
